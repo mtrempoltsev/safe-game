@@ -10,6 +10,8 @@ class QTimer;
 
 namespace safe
 {
+    class History;
+
     class MainWindow
         : public QMainWindow
     {
@@ -45,5 +47,7 @@ namespace safe
         QComboBox* size_;
 
         int secondsFromStart_ = 0;
+
+        History* history_;
     };
 }

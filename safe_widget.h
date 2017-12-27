@@ -9,21 +9,27 @@ class QGridLayout;
 
 namespace safe
 {
+    class History;
+
     class SafeWidget
         : public QFrame
     {
         Q_OBJECT
     public:
-        explicit SafeWidget(int size, QWidget* parent = nullptr);
+        SafeWidget(History* history, int size, QWidget* parent = nullptr);
+        ~SafeWidget();
+
+        void doSwitch(int row, int column);
 
     public slots:
         void onOrientationChanged(Orientation orient);
         void onSwitchClicked(int row, int column);
 
-        void onTryToSwitchNext();
-
     signals:
         void playerWon();
+
+    private slots:
+        void onTryToSwitchNext();
 
     private:
         void checkWinCondition();
@@ -31,12 +37,16 @@ namespace safe
         bool isValidCoord(int row, int column) const;
 
     private:
+        History* history_;
+
         QPixmap image_;
 
         const int size_;
         const int totalSwitches_;
         int horizontalSwitches_ = 0;
         int animatedSwitches_ = 0;
+
+        bool gameFinished_ = false;
 
         QGridLayout* switches_;
 

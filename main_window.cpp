@@ -12,6 +12,7 @@
 #include <QVBoxLayout>
 
 #include "hall_of_fame_dialog.h"
+#include "history.h"
 #include "safe_widget.h"
 #include "utils.h"
 
@@ -59,6 +60,8 @@ safe::MainWindow::MainWindow(QWidget* parent)
 
     setCentralWidget(frame);
 
+    history_ = new History(this);
+
     createMenu();
 
     onStartNewGame();
@@ -94,7 +97,7 @@ void safe::MainWindow::onStartNewGame()
 
     const auto size = size_->currentData().toInt();
 
-    auto safe = new SafeWidget(size);
+    auto safe = new SafeWidget(history_, size);
     connect(safe, &SafeWidget::playerWon, this, &MainWindow::onPlayerWon);
 
     placeForSafe_->addWidget(safe);
@@ -116,10 +119,10 @@ void safe::MainWindow::createMenu()
     auto file = new QMenu(tr("&File"));
     file->addAction(exit);
 
-    auto undo = new QAction(tr("&Undo"), this);
+    auto undo = history_->createUndoAction(this, tr("&Undo"));
     undo->setShortcut(QKeySequence::Undo);
 
-    auto redo = new QAction(tr("&Redo"), this);
+    auto redo = history_->createRedoAction(this, tr("&Redo"));
     redo->setShortcut(QKeySequence::Redo);
 
     auto edit = new QMenu(tr("&Edit"));

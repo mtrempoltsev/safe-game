@@ -4,10 +4,13 @@
 #include <QGridLayout>
 #include <QTimer>
 
+#include "history.h"
+#include "switch_command.h"
 #include "switch_widget.h"
 
-safe::SafeWidget::SafeWidget(int size, QWidget* parent)
+safe::SafeWidget::SafeWidget(History* history, int size, QWidget* parent)
     : QFrame(parent)
+    , history_(history)
     , image_(":/images/switch.png")
     , size_(size)
     , totalSwitches_(size * size)
@@ -38,22 +41,36 @@ safe::SafeWidget::SafeWidget(int size, QWidget* parent)
     setLayout(switches_);
 }
 
+safe::SafeWidget::~SafeWidget()
+{
+    history_->clear();
+}
+
+void safe::SafeWidget::doSwitch(int row, int column)
+{
+    history_->block();
+
+    changeSwitchOrientation(row, column);
+
+    lines_ = { row, column, column - 1, column + 1, row - 1, row + 1 };
+
+    QTimer::singleShot(timeoutToAnimateNextMsec, this, &SafeWidget::onTryToSwitchNext);
+}
+
 void safe::SafeWidget::onOrientationChanged(Orientation orient)
 {
     --animatedSwitches_;
+    if (animatedSwitches_ == 0)
+    {
+        history_->unblock();
+    }
+
     if (orient == Horizontal)
     {
         ++horizontalSwitches_;
     }
-    checkWinCondition();
-}
 
-void safe::SafeWidget::checkWinCondition()
-{
-    if (horizontalSwitches_ == totalSwitches_)
-    {
-        emit playerWon();
-    }
+    checkWinCondition();
 }
 
 void safe::SafeWidget::onSwitchClicked(int row, int column)
@@ -63,11 +80,7 @@ void safe::SafeWidget::onSwitchClicked(int row, int column)
         return;
     }
 
-    changeSwitchOrientation(row, column);
-
-    lines_ = { row, column, column - 1, column + 1, row - 1, row + 1 };
-
-    QTimer::singleShot(timeoutToAnimateNextMsec, this, &SafeWidget::onTryToSwitchNext);
+    history_->push(new SwitchCommand(this, row, column));
 }
 
 void safe::SafeWidget::onTryToSwitchNext()
@@ -99,6 +112,15 @@ void safe::SafeWidget::onTryToSwitchNext()
         ++lines_.right;
 
         QTimer::singleShot(timeoutToAnimateNextMsec, this, &SafeWidget::onTryToSwitchNext);
+    }
+}
+
+void safe::SafeWidget::checkWinCondition()
+{
+    if (!gameFinished_ && horizontalSwitches_ == totalSwitches_)
+    {
+        gameFinished_ = true;
+        emit playerWon();
     }
 }
 

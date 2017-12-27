@@ -13,7 +13,9 @@ SOURCES += \
     safe_widget.cpp \
     switch_widget.cpp \
     hall_of_fame_dialog.cpp \
-    utils.cpp
+    utils.cpp \
+    switch_command.cpp \
+    history.cpp
 
 HEADERS += \
     main_window.h \
@@ -21,7 +23,9 @@ HEADERS += \
     switch_widget.h \
     orientation.h \
     hall_of_fame_dialog.h \
-    utils.h
+    utils.h \
+    switch_command.h \
+    history.h
 
 RESOURCES += \
     resources/resources.qrc
