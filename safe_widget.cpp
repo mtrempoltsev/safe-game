@@ -21,7 +21,10 @@ safe::SafeWidget::SafeWidget(int size, QWidget* parent)
         for (int j = 0; j < size; ++j)
         {
             const Orientation orient = static_cast<Orientation>(qrand() % OrientationCount);
-            ++switchOrientations_[orient];
+            if (orient == Horizontal)
+            {
+                ++horizontalSwitches_;
+            }
 
             auto switchWidget = new SwitchWidget(image_, j, i, orient, this);
             connect(switchWidget, &SwitchWidget::orientationChanged, this, &SafeWidget::onOrientationChanged);
@@ -38,14 +41,16 @@ safe::SafeWidget::SafeWidget(int size, QWidget* parent)
 void safe::SafeWidget::onOrientationChanged(Orientation orient)
 {
     --animatedSwitches_;
-    ++switchOrientations_[orient];
+    if (orient == Horizontal)
+    {
+        ++horizontalSwitches_;
+    }
     checkWinCondition();
 }
 
 void safe::SafeWidget::checkWinCondition()
 {
-    if (switchOrientations_[Horizontal] == totalSwitches_
-        || switchOrientations_[Vertical] == totalSwitches_)
+    if (horizontalSwitches_ == totalSwitches_)
     {
         emit playerWon();
     }
@@ -104,7 +109,11 @@ void safe::SafeWidget::changeSwitchOrientation(int row, int column)
     auto item = switches_->itemAtPosition(row, column);
     auto switchWidget = static_cast<SwitchWidget*>(item->widget());
 
-    --switchOrientations_[switchWidget->orientation()];
+    if (switchWidget->orientation() == Horizontal)
+    {
+        --horizontalSwitches_;
+    }
+
     switchWidget->changeOrientation();
 }
 

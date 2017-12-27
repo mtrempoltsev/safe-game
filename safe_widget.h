@@ -35,8 +35,8 @@ namespace safe
 
         const int size_;
         const int totalSwitches_;
+        int horizontalSwitches_ = 0;
         int animatedSwitches_ = 0;
-        int switchOrientations_[OrientationCount] = { 0, 0 };
 
         QGridLayout* switches_;
 
