@@ -25,9 +25,13 @@ namespace safe
     private slots:
         void onStartNewGame();
         void onUpdateTime();
+        void onShowHallOfFame();
+        void onShowAbout();
 
     private:
         void showTime();
+
+        void createMenu();
 
     private:
         static constexpr int MinSize = 4;

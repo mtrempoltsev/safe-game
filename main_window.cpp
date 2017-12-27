@@ -1,10 +1,13 @@
 #include "main_window.h"
 
+#include <QAction>
 #include <QComboBox>
 #include <QFrame>
 #include <QLabel>
 #include <QPushButton>
 #include <QHBoxLayout>
+#include <QMenuBar>
+#include <QMessageBox>
 #include <QTimer>
 #include <QVBoxLayout>
 
@@ -56,6 +59,8 @@ safe::MainWindow::MainWindow(QWidget* parent)
 
     setCentralWidget(frame);
 
+    createMenu();
+
     onStartNewGame();
 }
 
@@ -66,8 +71,7 @@ safe::MainWindow::~MainWindow()
 void safe::MainWindow::onPlayerWon()
 {
     updateTime_->stop();
-    HallOfFameDialog dialog(secondsFromStart_);
-    dialog.exec();
+    HallOfFameDialog::showHall(secondsFromStart_);
 }
 
 void safe::MainWindow::onUpdateTime()
@@ -102,4 +106,51 @@ void safe::MainWindow::onStartNewGame()
 void safe::MainWindow::showTime()
 {
     time_->setText(secondsToString(secondsFromStart_));
+}
+
+void safe::MainWindow::createMenu()
+{
+    auto exit = new QAction(tr("E&xit"), this);
+    connect(exit, &QAction::triggered, this, &QMainWindow::close);
+
+    auto file = new QMenu(tr("&File"));
+    file->addAction(exit);
+
+    auto undo = new QAction(tr("&Undo"), this);
+    undo->setShortcut(QKeySequence::Undo);
+
+    auto redo = new QAction(tr("&Redo"), this);
+    redo->setShortcut(QKeySequence::Redo);
+
+    auto edit = new QMenu(tr("&Edit"));
+    edit->addAction(undo);
+    edit->addAction(redo);
+
+    auto hallOfFame = new QAction(tr("Hall of fame"), this);
+    connect(hallOfFame, &QAction::triggered, this, &MainWindow::onShowHallOfFame);
+
+    auto about = new QAction(tr("About"), this);
+    connect(about, &QAction::triggered, this, &MainWindow::onShowAbout);
+
+    auto info = new QMenu(tr("Info"));
+    info->addAction(hallOfFame);
+    info->addSeparator();
+    info->addAction(about);
+
+    auto menu = new QMenuBar();
+    menu->addMenu(file);
+    menu->addMenu(edit);
+    menu->addMenu(info);
+
+    setMenuBar(menu);
+}
+
+void safe::MainWindow::onShowHallOfFame()
+{
+    HallOfFameDialog::showHall();
+}
+
+void safe::MainWindow::onShowAbout()
+{
+    QMessageBox::about(nullptr, tr("Safe game"), tr("Set all the switches to the horizontal position to win."));
 }

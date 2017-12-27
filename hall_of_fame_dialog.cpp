@@ -17,12 +17,26 @@ namespace
     const char* FileName = "hall_of_fame.dat";
 }
 
-safe::HallOfFameDialog::HallOfFameDialog(int newTime, QWidget* parent)
+void safe::HallOfFameDialog::showHall()
+{
+    HallOfFameDialog dialog;
+    dialog.loadData();
+    dialog.fillTable();
+    dialog.exec();
+}
+
+void safe::HallOfFameDialog::showHall(int newTime)
+{
+    HallOfFameDialog dialog;
+    dialog.loadData();
+    dialog.checkNewRecord(newTime);
+    dialog.fillTable();
+    dialog.exec();
+}
+
+safe::HallOfFameDialog::HallOfFameDialog(QWidget* parent)
     : QDialog(parent)
 {
-    loadData();
-    checkNewRecord(newTime);
-
     table_ = new QTableWidget();
     table_->setColumnCount(2);
     table_->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -30,8 +44,6 @@ safe::HallOfFameDialog::HallOfFameDialog(int newTime, QWidget* parent)
     table_->setHorizontalHeaderItem(0, new QTableWidgetItem(tr("Name")));
     table_->setHorizontalHeaderItem(1, new QTableWidgetItem(tr("Time")));
     table_->horizontalHeader()->setStretchLastSection(true);
-
-    fillTable();
 
     auto ok = new QPushButton(tr("Ok"));
     connect(ok, &QPushButton::clicked, this, &QDialog::accept);
@@ -63,6 +75,9 @@ void safe::HallOfFameDialog::loadData()
     }
 
     QTextStream in(&file);
+    in.setCodec("UTF-8");
+
+    int n = 0;
     while(!in.atEnd())
     {
         const QString name = in.readLine();
@@ -83,6 +98,17 @@ void safe::HallOfFameDialog::loadData()
         }
 
         nameByTime_.insert(time, name);
+
+        ++n;
+        if (n >= MaxNames)
+        {
+            return;
+        }
+    }
+
+    if (nameByTime_.size() < MaxNames)
+    {
+        setDefaultData();
     }
 }
 
@@ -95,18 +121,12 @@ void safe::HallOfFameDialog::saveData()
     }
 
     QTextStream out(&file);
+    out.setCodec("UTF-8");
 
-    int n = 0;
     for (auto it = nameByTime_.constBegin(), end = nameByTime_.constEnd(); it != end; ++it)
     {
         out << it.value() << endl;
         out << it.key() << endl;
-
-        ++n;
-        if (n >= MaxNames)
-        {
-            return;
-        }
     }
 }
 

@@ -12,10 +12,14 @@ namespace safe
     {
         Q_OBJECT
     public:
-        explicit HallOfFameDialog(int newTime, QWidget* parent = nullptr);
+        static void showHall();
+        static void showHall(int newTime);
+
         ~HallOfFameDialog();
 
     private:
+        explicit HallOfFameDialog(QWidget* parent = nullptr);
+
         void loadData();
         void saveData();
         void fillTable();
