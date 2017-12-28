@@ -51,6 +51,7 @@ safe::MainWindow::MainWindow(QWidget* parent)
 
     auto layout = new QVBoxLayout();
     layout->addLayout(info);
+    layout->addStretch();
     layout->addLayout(placeForSafe_);
     layout->addStretch();
     layout->addLayout(controls);
